@@ -1,0 +1,249 @@
+<div class="card p-3 shadow-sm border-info">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">
+      <span class="badge bg-info me-2">Evaluate</span>
+      Evaluate Feature Flag
+    </h3>
+    @if (result) {
+      <button class="btn btn-sm btn-outline-secondary" (click)="clearResult()">Clear Result</button>
+    }
+  </div>
+  
+  <form [formGroup]="form" (ngSubmit)="evaluateFeature()">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Feature Name <span class="text-danger">*</span></label>
+        @if (isLoading) {
+          <div class="form-control">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <small class="text-muted">Loading features...</small>
+          </div>
+        } @else {
+          <input 
+            formControlName="name" 
+            class="form-control" 
+            list="featureList"
+            placeholder="Select from dropdown or type feature name"
+            autocomplete="off" />
+          <datalist id="featureList">
+            @for (feature of features; track feature.id) {
+              <option [value]="feature.name">{{ feature.name }}</option>
+            }
+          </datalist>
+        }
+        <small class="form-text text-muted">
+          @if (features.length > 0) {
+            Select from {{ features.length }} available features or type a name
+          } @else {
+            Type the feature name to evaluate
+          }
+        </small>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">User ID</label>
+        @if (isLoadingOverrides) {
+          <div class="form-control">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <small class="text-muted">Loading overrides...</small>
+          </div>
+        } @else {
+          @if (availableUserIds.length > 0) {
+            <input 
+              formControlName="userId" 
+              class="form-control" 
+              list="userList"
+              placeholder="Select or type user ID"
+              autocomplete="off" />
+            <datalist id="userList">
+              @for (userId of availableUserIds; track userId) {
+                <option [value]="userId">{{ userId }}</option>
+              }
+            </datalist>
+            <small class="form-text text-success">
+              <strong>{{ availableUserIds.length }}</strong> user override(s) available
+            </small>
+          } @else {
+            <input formControlName="userId" class="form-control" placeholder="e.g., user123" />
+            <small class="form-text text-muted">Optional: Test user-specific override</small>
+          }
+        }
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Group ID</label>
+        @if (isLoadingOverrides) {
+          <div class="form-control">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <small class="text-muted">Loading overrides...</small>
+          </div>
+        } @else {
+          @if (availableGroupIds.length > 0) {
+            <input 
+              formControlName="groupId" 
+              class="form-control" 
+              list="groupList"
+              placeholder="Select or type group ID"
+              autocomplete="off" />
+            <datalist id="groupList">
+              @for (groupId of availableGroupIds; track groupId) {
+                <option [value]="groupId">{{ groupId }}</option>
+              }
+            </datalist>
+            <small class="form-text text-success">
+              <strong>{{ availableGroupIds.length }}</strong> group override(s) available
+            </small>
+          } @else {
+            <input formControlName="groupId" class="form-control" placeholder="e.g., premium-users" />
+            <small class="form-text text-muted">Optional: Test group-specific override</small>
+          }
+        }
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Region</label>
+        @if (isLoadingOverrides) {
+          <div class="form-control">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <small class="text-muted">Loading overrides...</small>
+          </div>
+        } @else {
+          @if (availableRegions.length > 0) {
+            <input 
+              formControlName="region" 
+              class="form-control" 
+              list="regionList"
+              placeholder="Select or type region"
+              autocomplete="off" />
+            <datalist id="regionList">
+              @for (region of availableRegions; track region) {
+                <option [value]="region">{{ region }}</option>
+              }
+            </datalist>
+            <small class="form-text text-success">
+              <strong>{{ availableRegions.length }}</strong> region override(s) available
+            </small>
+          } @else {
+            <input formControlName="region" class="form-control" placeholder="e.g., US, EU, IN" />
+            <small class="form-text text-muted">Optional: Test region-specific override</small>
+          }
+        }
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary" type="submit" [disabled]="isEvaluating || !form.valid">
+        @if (isEvaluating) {
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Evaluating...
+        } @else {
+          Evaluate
+        }
+      </button>
+      <button class="btn btn-outline-secondary" type="button" (click)="resetForm()">Reset</button>
+    </div>
+  </form>
+
+  @if (overrides.length > 0) {
+    <div class="mt-3 p-3 bg-light rounded">
+      <h6 class="mb-2">
+        <strong>Available Overrides for this Feature:</strong>
+        <span class="badge bg-info ms-2">{{ overrides.length }}</span>
+      </h6>
+      <div class="row">
+        @if (availableUserIds.length > 0) {
+          <div class="col-md-4 mb-2">
+            <strong class="text-primary">Users:</strong>
+            <div class="d-flex flex-wrap gap-1 mt-1">
+              @for (userId of availableUserIds; track userId) {
+                <span class="badge bg-primary" (click)="form.patchValue({ userId: userId })" style="cursor: pointer;" title="Click to select">
+                  {{ userId }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+        @if (availableGroupIds.length > 0) {
+          <div class="col-md-4 mb-2">
+            <strong class="text-success">Groups:</strong>
+            <div class="d-flex flex-wrap gap-1 mt-1">
+              @for (groupId of availableGroupIds; track groupId) {
+                <span class="badge bg-success" (click)="form.patchValue({ groupId: groupId })" style="cursor: pointer;" title="Click to select">
+                  {{ groupId }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+        @if (availableRegions.length > 0) {
+          <div class="col-md-4 mb-2">
+            <strong class="text-warning">Regions:</strong>
+            <div class="d-flex flex-wrap gap-1 mt-1">
+              @for (region of availableRegions; track region) {
+                <span class="badge bg-warning text-dark" (click)="form.patchValue({ region: region })" style="cursor: pointer;" title="Click to select">
+                  {{ region }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <small class="text-muted d-block mt-2">
+        💡 Click on any override badge above to quickly select it for evaluation
+      </small>
+    </div>
+  }
+
+  @if (result !== null) {
+    <div class="mt-4">
+      <div class="card" [ngClass]="result.isEnabled ? 'border-success bg-light' : 'border-secondary bg-light'">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <h5 class="card-title mb-0 me-3">Evaluation Result</h5>
+            <span class="badge fs-6" [ngClass]="result.isEnabled ? 'bg-success' : 'bg-secondary'">
+              {{ result.isEnabled ? 'Enabled' : 'Disabled' }}
+            </span>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-2">
+              <strong>Feature Name:</strong> {{ form.get('name')?.value }}
+            </div>
+            <div class="col-md-6 mb-2">
+              <strong>Applied Rule:</strong> 
+              <span class="badge bg-info">{{ result.appliedOverride || 'Default' }}</span>
+            </div>
+          </div>
+
+          @if (result.appliedOverrideKey) {
+            <div class="mb-2">
+              <strong>Override Key:</strong> 
+              <code class="bg-white px-2 py-1 rounded">{{ result.appliedOverrideKey }}</code>
+            </div>
+          }
+
+          <div class="mt-3 p-2 bg-white rounded">
+            <small class="text-muted">
+              <strong>Evaluation Priority:</strong> User Override → Group Override → Region Override → Default State
+            </small>
+          </div>
+
+          @if (form.get('userId')?.value || form.get('groupId')?.value || form.get('region')?.value) {
+            <div class="mt-2">
+              <small class="text-muted">
+                <strong>Context Used:</strong>
+                @if (form.get('userId')?.value) {
+                  <span class="badge bg-primary me-1">User: {{ form.get('userId')?.value }}</span>
+                }
+                @if (form.get('groupId')?.value) {
+                  <span class="badge bg-primary me-1">Group: {{ form.get('groupId')?.value }}</span>
+                }
+                @if (form.get('region')?.value) {
+                  <span class="badge bg-primary me-1">Region: {{ form.get('region')?.value }}</span>
+                }
+              </small>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

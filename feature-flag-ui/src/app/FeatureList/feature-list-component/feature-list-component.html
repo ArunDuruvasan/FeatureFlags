@@ -1,0 +1,142 @@
+<div class="container my-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h2 class="h5 mb-0">Feature Flags</h2>
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#featureFormModal">
+        Add Feature
+      </button>
+    </div>
+    <div class="card-body p-3">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Description</th>
+              <th scope="col">Default State</th>
+              <th scope="col" class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (f of features; track f.id) {
+              <tr>
+                <td>
+                  @if (editingFeature?.id !== f.id) {
+                    <div>{{ f.name }}</div>
+                  } @else {
+                    <div>
+                      <input [(ngModel)]="editingFeature!.name" class="form-control form-control-sm" readonly />
+                    </div>
+                  }
+                </td>
+                <td>
+                  @if (editingFeature?.id !== f.id) {
+                    <div>{{ f.description || '-' }}</div>
+                  } @else {
+                    <div>
+                      <input [(ngModel)]="editingFeature!.description" class="form-control form-control-sm" />
+                    </div>
+                  }
+                </td>
+                <td>
+                  @if (editingFeature?.id !== f.id) {
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="form-check form-switch mb-0">
+                        <input 
+                          class="form-check-input" 
+                          type="checkbox" 
+                          role="switch"
+                          [checked]="f.defaultState"
+                          [id]="'toggle-' + f.id"
+                          (change)="toggleDefaultState(f)"
+                          [disabled]="isToggling === f.id">
+                        <label class="form-check-label" [for]="'toggle-' + f.id">
+                          @if (isToggling === f.id) {
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                          }
+                          <span [ngClass]="f.defaultState ? 'text-success fw-bold' : 'text-secondary'">
+                            {{ f.defaultState ? 'Enabled' : 'Disabled' }}
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  } @else {
+                    <div>
+                      <select [(ngModel)]="editingFeature!.defaultState" class="form-select form-select-sm">
+                        <option [value]="true">Enabled</option>
+                        <option [value]="false">Disabled</option>
+                      </select>
+                    </div>
+                  }
+                </td>
+                <td class="text-center">
+                  @if (editingFeature?.id !== f.id) {
+                    <div>
+                      <button class="btn btn-sm btn-info me-2" (click)="quickEvaluate(f.name, f.id)" title="Quick Evaluate">
+                        Evaluate
+                      </button>
+                      <button class="btn btn-sm btn-primary me-2" (click)="manageOverrides(f.id)">
+                        Manage Overrides
+                      </button>
+                      <button class="btn btn-sm btn-outline-primary me-2" (click)="editFeature(f)">
+                        Edit
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" (click)="deleteFeature(f.id)">
+                        Delete
+                      </button>
+                    </div>
+                  } @else {
+                    <div>
+                      <button class="btn btn-sm btn-success me-2" (click)="saveEdit()">Save</button>
+                      <button class="btn btn-sm btn-outline-secondary" (click)="cancelEdit()">Cancel</button>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (selectedFeatureId) {
+  <div class="mt-4">
+    <app-override-form 
+      [featureId]="selectedFeatureId" 
+      (overrideSaved)="closeManageOverrides()"
+      (closeRequested)="closeManageOverrides()">
+    </app-override-form>
+    <app-region-toggle [featureId]="selectedFeatureId"></app-region-toggle>
+  </div>
+}
+
+@if (showEvaluationTester) {
+  <div class="mt-4" id="evaluationSection">
+    <app-evaluation-tester 
+      [prefillFeatureName]="selectedFeatureForEvaluation"
+      [prefillFeatureId]="selectedFeatureIdForEvaluation">
+    </app-evaluation-tester>
+    <div class="text-center mt-2">
+      <button class="btn btn-sm btn-outline-secondary" (click)="closeEvaluationTester()">
+        × Close Evaluation
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Modal -->
+<div class="modal fade" id="featureFormModal" tabindex="-1" aria-labelledby="featureFormLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="featureFormLabel">Add Feature</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <app-feature-form (featureCreated)="onFeatureCreated()"></app-feature-form>
+      </div>
+    </div>
+  </div>
+</div>
