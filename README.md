@@ -17,7 +17,7 @@ A comprehensive feature flag system built with Angular, .NET Core Web API, and S
 - ✅ **Region-Based Overrides**: Extended override mechanism for region-specific feature control
 
 ## Architecture
-
+Folowwed 3 layered architecture (UI, API and DB)
 ### Backend (.NET Core Web API)
 - **Framework**: .NET 8.0
 - **Database**: SQL Server with Entity Framework Core
@@ -58,6 +58,7 @@ dotnet ef database update
 ```
 
 Or manually create the database and let EF Core create tables on first run.
+attached the schema.sql.
 
 ### 2. Backend Setup
 
@@ -239,21 +240,4 @@ npm test
 - ✅ FeatureListComponent - Feature management UI
 - ✅ EvaluationTesterComponent - Feature evaluation
 
-**Run with coverage:**
-```bash
-npm test -- --code-coverage
-```
 
-## Future Enhancements
-
-Potential improvements:
-- Authentication and authorization
-- Audit logging
-- Feature flag analytics
-- Percentage-based rollouts
-- Scheduled feature releases
-- A/B testing integration
-
-## License
-
-This project is provided as-is for demonstration purposes.
