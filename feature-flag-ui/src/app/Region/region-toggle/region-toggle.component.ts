@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class RegionToggleComponent implements OnInit, OnChanges {
   @Input() featureId: string | null = null;
-  regions = ['US', 'EU', 'IN', 'APAC', 'LATAM'];
+  regions = ['US', 'EU', 'IN', 'AUS', 'UK'];
   regionStates: { [key: string]: boolean } = {};
   regionOverrides: { [key: string]: Override | null } = {};
 
